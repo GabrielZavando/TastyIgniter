@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tastyigniter_app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - tastyigniter
+    depends_on:
+      - db
+
+  web:
+    image: nginx:alpine
+    container_name: tastyigniter_web
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - tastyigniter
+    depends_on:
+      - app
+
+  db:
+    image: mariadb:10.6
+    container_name: tastyigniter_db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: tastyigniter
+      MYSQL_USER: tiuser
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - tastyigniter
+
+volumes:
+  dbdata:
+    driver: local
+
+networks:
+  tastyigniter:
+    driver: bridge
