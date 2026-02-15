@@ -5,14 +5,18 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libwebp-dev \
     libzip-dev \
     libicu-dev \
+    libmagickwand-dev \
     unzip \
     git \
     curl \
     mariadb-client \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip intl bcmath opcache
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip intl bcmath opcache exif \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
